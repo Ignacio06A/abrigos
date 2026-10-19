@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>¡Hola!</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #131a30;
+    --panel-2: #1a2342;
+    --accent: #5b8cff;
+    --accent-2: #22d3a6;
+    --text: #e8edff;
+    --muted: #8e9ac4;
+    --danger: #ff5b7a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #1d2a5c 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 20%, #10352e 0%, transparent 55%),
+      var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 18px 40px;
+  }
+  header {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: .3px; }
+  .dot-live {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent-2);
+    box-shadow: 0 0 0 0 rgba(34,211,166,.6);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(34,211,166,.5); }
+    70% { box-shadow: 0 0 0 9px rgba(34,211,166,0); }
+    100% { box-shadow: 0 0 0 0 rgba(34,211,166,0); }
+  }
+  .status { color: var(--muted); font-size: 13px; }
+
+  button {
+    font: inherit;
+    border: 0;
+    border-radius: 999px;
+    padding: 11px 20px;
+    cursor: pointer;
+    background: var(--panel-2);
+    color: var(--text);
+    transition: transform .12s ease, background .2s ease, opacity .2s ease;
+  }
+  button:hover { transform: translateY(-2px); background: #232e57; }
+  button:active { transform: translateY(0); }
+  button.primary { background: var(--accent); color: #fff; font-weight: 600; }
+  button.primary:hover { background: #6d9aff; }
+  button.ghost { background: transparent; border: 1px solid #2b3767; }
+  button.danger { background: rgba(255,91,122,.15); color: var(--danger); }
+  button:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+
+  .stage {
+    width: 100%;
+    max-width: 900px;
+    background: linear-gradient(160deg, var(--panel) 0%, #0f1530 100%);
+    border: 1px solid #222c52;
+    border-radius: 18px;
+    padding: clamp(28px, 6vw, 64px);
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,.45);
+  }
+  .stage::after {
+    content: "";
+    position: absolute;
+    inset: auto -40% -60% auto;
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, rgba(91,140,255,.28), transparent 65%);
+    pointer-events: none;
+  }
+  .slide { animation: fade .35s ease; position: relative; z-index: 1; }
+  @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .slide h1 {
+    font-size: clamp(38px, 8vw, 72px);
+    line-height: 1.05;
+    margin-bottom: 16px;
+    background: linear-gradient(90deg, #fff, #9db8ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    word-break: break-word;
+  }
+  .slide p {
+    font-size: clamp(16px, 2.4vw, 21px);
+    color: #c3cdf3;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-width: 65ch;
+  }
+
+  .footer {
+    width: 100%;
+    max-width: 900px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .bullets { display: flex; gap: 7px; }
+  .bullets span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #2c3767; transition: all .25s ease;
+  }
+  .bullets span.on { background: var(--accent); width: 22px; border-radius: 999px; }
+  .counter { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+  .controls {
+    display: none;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: rgba(91,140,255,.1);
+    border: 1px dashed rgba(91,140,255,.45);
+    padding: 12px 14px;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 18px;
+    align-items: center;
+  }
+  .controls.show { display: flex; animation: fade .3s ease; }
+  .controls .label { font-size: 13px; color: var(--accent-2); font-weight: 600; margin-right: auto; }
+
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(4,7,18,.72);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 20px; z-index: 50;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    width: 100%; max-width: 440px;
+    background: var(--panel);
+    border: 1px solid #26305c;
+    border-radius: 16px;
+    padding: 26px;
+    animation: fade .25s ease;
+  }
+  .modal h2 { font-size: 20px; margin-bottom: 6px; }
+  .modal .hint { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+  .modal label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+  .modal input, .modal textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--text);
+    background: #0d1330;
+    border: 1px solid #2a3567;
+    border-radius: 10px;
+    padding: 11px 13px;
+    outline: none;
+  }
+  .modal textarea { min-height: 120px; resize: vertical; }
+  .modal input:focus, .modal textarea:focus { border-color: var(--accent); }
+  .modal .row { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; flex-wrap: wrap; }
+  .error { color: var(--danger); font-size: 13px; margin-top: 12px; min-height: 16px; }
+
+  #toast {
+    position: fixed;
+    bottom: 26px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1c264d;
+    border: 1px solid #303c74;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .3s ease;
+    z-index: 99;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand" id="brand"><span class="dot-live" id="liveDot"></span> Presentación en vivo</div>
+    <span class="status" id="conn">conectando…</span>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="slide" id="slide">
+      <h1>¡Hola!</h1>
+    </div>
+  </main>
+
+  <div class="footer">
+    <div class="bullets" id="bullets"></div>
+    <div class="counter" id="counter">– / –</div>
+  </div>
+
+  <div class="controls" id="controls">
+    <span class="label">Modo autorizado</span>
+    <button id="btnPrev">◀ Anterior</button>
+    <button id="btnNext">Siguiente ▶</button>
+    <button id="btnEdit">Editar</button>
+    <button id="btnAdd">Añadir</button>
+    <button id="btnDelete" class="danger">Eliminar</button>
+    <button id="btnLock" class="ghost">Bloquear</button>
+  </div>
+
+  <div class="overlay" id="overlayToken">
+    <div class="modal">
+      <h2>Acceso autorizado</h2>
+      <p class="hint">Introduce el token de control para poder dirigir la presentación.</p>
+      <label for="tokenInput">Token</label>
+      <input id="tokenInput" type="password" autocomplete="off" placeholder="••••••••" />
+      <div class="error" id="tokenError"></div>
+      <div class="row">
+        <button class="ghost" data-close>Cancelar</button>
+        <button class="primary" id="btnTokenOk">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlayEdit">
+    <div class="modal">
+      <h2 id="editTitle">Editar diapositiva</h2>
+      <p class="hint">Se mostrará a todos los conectados al guardar.</p>
+      <label for="fTitle">Título</label>
+      <input id="fTitle" maxlength="120" placeholder="Título" />
+      <label for="fText">Contenido</label>
+      <textarea id="fText" maxlength="600" placeholder="Escribe aquí…"></textarea>
+      <div class="error" id="editError"></div>
+      <div class="row">
+        <button class="ghost" data-close>Cancelar</button>
+        <button class="primary" id="btnSave">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+<script>
+(() => {
+  const CONFIG = {
+    token: 'hola2026',
+    topic: 'hola-pres-7a3e9c2b',
+    ntfy: 'https://ntfy.sh',
+  };
+
+  const DEFAULTS = [
+    { title: '¡Hola!', text: 'Bienvenido a la presentación. Cualquiera puede verla desde su teléfono o compu.' },
+    { title: 'Diapositiva 2', text: 'Aquí se muestra lo que el autorizado decida: texto, mensajes o lo que quiera.' },
+    { title: 'Diapositiva 3', text: 'Los cambios se ven al instante en todos los dispositivos conectados.' },
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const DECK_KEY = 'ppt_deck_' + CONFIG.topic;
+  const IDX_KEY = 'ppt_idx_' + CONFIG.topic;
+
+  let deck = loadDeck();
+  let index = clampIndex(Number(localStorage.getItem(IDX_KEY)) || 0);
+  let view = { i: 0, n: 0, title: '¡Hola!', text: '' };
+  let lastT = 0;
+  let authorized = false;
+  let token = '';
+  let mode = 'view';
+  let es = null;
+  let pollTimer = null;
+  let pollBusy = false;
+
+  function clampIndex(i) {
+    return Math.max(0, Math.min(i, deck.length - 1));
+  }
+
+  function loadDeck() {
+    try {
+      const d = JSON.parse(localStorage.getItem(DECK_KEY));
+      if (Array.isArray(d) && d.length) {
+        return d.map((s) => ({
+          title: typeof s.title === 'string' ? s.title.slice(0, 120) : '',
+          text: typeof s.text === 'string' ? s.text.slice(0, 600) : '',
+        }));
+      }
+    } catch (_) {}
+    return DEFAULTS.map((s) => ({ ...s }));
+  }
+
+  function saveDeck() {
+    try {
+      localStorage.setItem(DECK_KEY, JSON.stringify(deck));
+      localStorage.setItem(IDX_KEY, String(index));
+    } catch (_) {}
+  }
+
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._h);
+    t._h = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  function render() {
+    const box = $('slide');
+    box.innerHTML = '';
+    const h = document.createElement('h1');
+    h.textContent = view.title || '¡Hola!';
+    box.appendChild(h);
+    if (view.text) {
+      const p = document.createElement('p');
+      p.textContent = view.text;
+      box.appendChild(p);
+    }
+    box.style.animation = 'none';
+    void box.offsetWidth;
+    box.style.animation = '';
+
+    const n = view.n;
+    $('counter').textContent = n ? `${view.i + 1} / ${n}` : '– / –';
+    const b = $('bullets');
+    b.innerHTML = '';
+    for (let k = 0; k < n; k++) {
+      const d = document.createElement('span');
+      if (k === view.i) d.className = 'on';
+      b.appendChild(d);
+    }
+
+    $('btnPrev').disabled = !authorized || index <= 0;
+    $('btnNext').disabled = !authorized || index >= deck.length - 1;
+    $('btnEdit').disabled = !authorized;
+    $('btnDelete').disabled = !authorized || deck.length <= 1;
+  }
+
+  function applyIncoming(p) {
+    if (!p || typeof p !== 'object') return;
+    const t = Number(p.t) || 0;
+    if (t <= lastT) return;
+    lastT = t;
+    view = {
+      title: typeof p.title === 'string' ? p.title.slice(0, 120) : '¡Hola!',
+      text: typeof p.text === 'string' ? p.text.slice(0, 600) : '',
+      i: Number.isInteger(p.i) ? Math.max(0, p.i) : 0,
+      n: Number.isInteger(p.n) ? Math.max(1, p.n) : 1,
+    };
+    render();
+  }
+
+  async function publish() {
+    const s = deck[index];
+    const payload = {
+      i: index,
+      n: deck.length,
+      title: s.title,
+      text: s.text,
+      t: Date.now(),
+    };
+    view = { ...payload };
+    lastT = payload.t;
+    render();
+    try {
+      const res = await fetch(`${CONFIG.ntfy}/${CONFIG.topic}`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('No se pudo publicar (' + res.status + ')');
+    } catch (e) {
+      toast('Sin conexión: ' + e.message);
+    }
+  }
+
+  async function pollOnce() {
+    if (pollBusy) return;
+    pollBusy = true;
+    try {
+      const res = await fetch(`${CONFIG.ntfy}/${CONFIG.topic}/json?poll=1&since=1d`, {
+        cache: 'no-store',
+      });
+      const text = await res.text();
+      for (const line of text.split('\n')) {
+        if (!line.trim()) continue;
+        try {
+          const m = JSON.parse(line);
+          if (m.event === 'message' && m.message) applyIncoming(JSON.parse(m.message));
+        } catch (_) {}
+      }
+      $('conn').textContent = 'en vivo';
+    } catch (_) {
+      $('conn').textContent = 'sin conexión';
+    } finally {
+      pollBusy = false;
+    }
+  }
+
+  function listen() {
+    if (es) es.close();
+    es = new EventSource(`${CONFIG.ntfy}/${CONFIG.topic}/sse?since=all`);
+    es.onopen = () => {
+      $('conn').textContent = 'en vivo';
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    };
+    es.onmessage = (e) => {
+      try {
+        const m = JSON.parse(e.data);
+        if (m.event === 'message' && m.message) applyIncoming(JSON.parse(m.message));
+      } catch (_) {}
+    };
+    es.onerror = () => {
+      $('conn').textContent = 'reconectando…';
+      if (!pollTimer) pollTimer = setInterval(pollOnce, 2500);
+    };
+  }
+
+  function go(delta) {
+    const next = clampIndex(index + delta);
+    if (next === index) return;
+    index = next;
+    saveDeck();
+    publish();
+  }
+
+  function setAuthorized(ok) {
+    authorized = ok;
+    $('controls').classList.toggle('show', ok);
+    render();
+  }
+
+  function lock() {
+    token = '';
+    sessionStorage.removeItem('ppt_token');
+    setAuthorized(false);
+    toast('Sesión bloqueada');
+  }
+
+  function openOverlay(id) { $(id).classList.add('show'); }
+  function closeOverlays() { document.querySelectorAll('.overlay').forEach((o) => o.classList.remove('show')); }
+
+  function openTokenPrompt() {
+    if (authorized) return;
+    $('tokenError').textContent = '';
+    $('tokenInput').value = '';
+    openOverlay('overlayToken');
+    setTimeout(() => $('tokenInput').focus(), 50);
+  }
+
+  document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', closeOverlays));
+  document.querySelectorAll('.overlay').forEach((o) =>
+    o.addEventListener('click', (e) => {
+      if (e.target === o) closeOverlays();
+    })
+  );
+
+  document.addEventListener('keydown', (e) => {
+    if (document.querySelector('.overlay.show')) return;
+    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+      e.preventDefault();
+      openTokenPrompt();
+      return;
+    }
+    if (!authorized) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') go(1);
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(-1);
+  });
+
+  let taps = 0;
+  let tapTimer = null;
+  function secretTap() {
+    taps++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => (taps = 0), 700);
+    if (taps >= 3) {
+      taps = 0;
+      openTokenPrompt();
+    }
+  }
+  $('brand').addEventListener('click', secretTap);
+  $('liveDot').addEventListener('click', (e) => {
+    e.stopPropagation();
+    secretTap();
+  });
+
+  $('btnTokenOk').addEventListener('click', () => {
+    const v = $('tokenInput').value.trim();
+    if (!v) {
+      $('tokenError').textContent = 'Escribe el token.';
+      return;
+    }
+    if (v !== CONFIG.token) {
+      $('tokenError').textContent = 'Token no válido.';
+      return;
+    }
+    token = v;
+    sessionStorage.setItem('ppt_token', token);
+    closeOverlays();
+    startControl();
+    toast('Acceso concedido');
+  });
+  $('tokenInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('btnTokenOk').click();
+  });
+
+  function startControl() {
+    index = clampIndex(view.n ? view.i : index);
+    saveDeck();
+    setAuthorized(true);
+    publish();
+  }
+
+  $('btnPrev').addEventListener('click', () => go(-1));
+  $('btnNext').addEventListener('click', () => go(1));
+  $('btnLock').addEventListener('click', lock);
+
+  $('btnAdd').addEventListener('click', () => {
+    mode = 'add';
+    $('editTitle').textContent = 'Nueva diapositiva';
+    $('fTitle').value = '';
+    $('fText').value = '';
+    $('editError').textContent = '';
+    openOverlay('overlayEdit');
+    setTimeout(() => $('fTitle').focus(), 50);
+  });
+
+  $('btnEdit').addEventListener('click', () => {
+    mode = 'edit';
+    const s = deck[index];
+    if (!s) return;
+    $('editTitle').textContent = 'Editar diapositiva';
+    $('fTitle').value = s.title;
+    $('fText').value = s.text;
+    $('editError').textContent = '';
+    openOverlay('overlayEdit');
+    setTimeout(() => $('fTitle').focus(), 50);
+  });
+
+  $('btnDelete').addEventListener('click', () => {
+    if (deck.length <= 1) return;
+    deck.splice(index, 1);
+    index = clampIndex(index);
+    saveDeck();
+    publish();
+    toast('Diapositiva eliminada');
+  });
+
+  $('btnSave').addEventListener('click', () => {
+    const title = $('fTitle').value.trim();
+    const text = $('fText').value;
+    if (!title && !text) {
+      $('editError').textContent = 'Añade al menos un título o texto.';
+      return;
+    }
+    if (mode === 'add') {
+      deck.push({ title, text });
+      index = deck.length - 1;
+    } else {
+      deck[index] = { title, text };
+    }
+    saveDeck();
+    closeOverlays();
+    publish();
+    toast('Guardado y compartido');
+  });
+
+  (async function init() {
+    const hash = decodeURIComponent(location.hash.slice(1));
+    let authByHash = false;
+    if (hash) {
+      history.replaceState(null, '', location.pathname + location.search);
+      if (hash === CONFIG.token) {
+        authByHash = true;
+        token = hash;
+        sessionStorage.setItem('ppt_token', token);
+      }
+    }
+
+    await pollOnce();
+    listen();
+
+    if (authByHash) {
+      startControl();
+      toast('Modo autorizado activo');
+    } else if (sessionStorage.getItem('ppt_token') === CONFIG.token) {
+      token = CONFIG.token;
+      startControl();
+    } else {
+      setAuthorized(false);
+      render();
+    }
+  })();
+})();
+</script>
+</body>
+</html>
